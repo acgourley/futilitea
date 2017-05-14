@@ -1,16 +1,21 @@
 import time
 import cv2
 import sys
+import os
 import imutils
 import RPi.GPIO as GPIO
 
-unwatched = GPIO.LOW
-watched = GPIO.HIGH
+#unwatched = GPIO.LOW
+#watched = GPIO.HIGH
 
-if len(sys.argv) > 1:
-  unwatched = GPIO.HIGH
-  watched = GPIO.LOW
+#if len(sys.argv) > 1:
+unwatched = GPIO.HIGH
+watched = GPIO.LOW
 
+gui = True
+print("argv:", sys.argv)
+if sys.argv[1] == 'nogui':
+  gui = False
 GPIO.setmode(GPIO.BOARD)
 iopin = 40
 
@@ -18,12 +23,15 @@ GPIO.setup(iopin, GPIO.OUT)
 GPIO.output(iopin, unwatched)
 
 # Create the haar cascade
-faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+__location__ = os.path.realpath(
+  os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+faceCascade = cv2.CascadeClassifier(os.path.join(__location__, "haarcascade_frontalface_default.xml"))
 
 # initialize the camera and grab a reference to the raw camera capture
 cam = cv2.VideoCapture(0)
-cam.set(3, 160)
-cam.set(4, 120)
+#cam.set(3, 320)
+#cam.set(4, 240)
 # allow the camera to warmup
 time.sleep(0.1)
 
@@ -65,12 +73,12 @@ while True:
       GPIO.output(iopin, unwatched)
       lastOutput = unwatched
 
-  # show the frame
-  cv2.imshow("Frame", image)
-  if cv2.waitKey(1) == 27:
+  if gui: 
+    cv2.imshow("Frame", image)
+    if cv2.waitKey(1) == 27:
       break
         
-  
-cv2.destroyAllWindows()
+if gui: 
+  cv2.destroyAllWindows()
         
 
